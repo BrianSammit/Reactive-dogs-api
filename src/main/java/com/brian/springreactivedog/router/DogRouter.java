@@ -1,10 +1,7 @@
 package com.brian.springreactivedog.router;
 
 import com.brian.springreactivedog.domain.DTO.DogDTO;
-import com.brian.springreactivedog.usecases.DeleteDogUseCase;
-import com.brian.springreactivedog.usecases.GetAllDogsUseCase;
-import com.brian.springreactivedog.usecases.GetDogsByIdUseCase;
-import com.brian.springreactivedog.usecases.SaveDogUseCase;
+import com.brian.springreactivedog.usecases.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -50,7 +47,6 @@ public class DogRouter {
                         .onErrorResume(throwable -> ServerResponse.notFound().build()));
     }
 
-
     @Bean
     public RouterFunction<ServerResponse> deleteStudents(DeleteDogUseCase deleteDogUseCase){
         return  route(DELETE("/dogs/{id}"),
@@ -59,6 +55,19 @@ public class DogRouter {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue("Dog Deleted"))
                         .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NOT_FOUND).build())
+        );
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> updateDog(UpdateDogUseCase updateDogUseCase){
+        return route(PUT("/dogs/{id}").and(accept(MediaType.APPLICATION_JSON)),
+                request -> request.bodyToMono(DogDTO.class)
+                        .flatMap(dogDTO -> updateDogUseCase.update(request.pathVariable("id"), dogDTO)
+                                .flatMap(result -> ServerResponse.status(200)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .bodyValue(result))
+                                .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NOT_FOUND).build())
+                        )
         );
     }
 }
