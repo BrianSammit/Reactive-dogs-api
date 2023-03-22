@@ -41,17 +41,17 @@ class DeleteDogUseCaseTest {
                 });
         Mockito.when(repository.delete(dog)).
                 thenAnswer(InvocationOnMock -> {
-                    return Mono.just(Void.TYPE);
+                    return Mono.empty();
                 });
 
-        Mono<String> response = deleteDogUseCase.delete("Test project");
+        var response = deleteDogUseCase.delete(ArgumentMatchers.anyString());
 
         StepVerifier.create(response)
-                .expectNextCount(1)
+                .expectNextCount(0)
                 .verifyComplete();
 
         Mockito.verify(repository).delete(dog);
-        Mockito.verify(repository).findById("Test project");
+        Mockito.verify(repository).findById(ArgumentMatchers.anyString());
     }
 
 }
