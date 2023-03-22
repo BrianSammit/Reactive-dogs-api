@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,22 +16,22 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
-class SaveDogUseCaseTest {
+class UpdateDogUseCaseTest {
 
     @Mock
     IDogRepository repository;
     ModelMapper modelMapper;
-    SaveDogUseCase saveDogUseCase;
+    UpdateDogUseCase updateDogUseCase;
 
     @BeforeEach
     void init() {
         modelMapper = new ModelMapper();
-        saveDogUseCase = new SaveDogUseCase(repository, modelMapper);
+        updateDogUseCase = new UpdateDogUseCase(repository, modelMapper);
     }
 
     @Test
-    @DisplayName("save_Success")
-    void saveDog() {
+    @DisplayName("update_Success")
+    void updateDog() {
 
         Dog dog = new Dog();
         dog.setName("Test name");
@@ -38,19 +39,24 @@ class SaveDogUseCaseTest {
         dog.setAge(3);
         dog.setColor("Test color");
 
+        Mockito.when(repository.findById(ArgumentMatchers.anyString())).
+                thenAnswer(InvocationOnMock -> {
+                    return Mono.just(dog);
+                });
         Mockito.when(repository.save(dog)).
                 thenAnswer(InvocationOnMock -> {
                     return Mono.just(dog);
                 });
 
-        Mono<DogDTO> response = saveDogUseCase.save(modelMapper.map(dog, DogDTO.class));
+        Mono<DogDTO> response = updateDogUseCase.update("Test id", modelMapper.map(dog, DogDTO.class));
 
         StepVerifier.create(response)
-                .expectNext(modelMapper.map(dog,DogDTO.class))
+                .expectNext(modelMapper.map(dog, DogDTO.class))
                 .expectNextCount(0)
                 .verifyComplete();
 
         Mockito.verify(repository).save(dog);
+        Mockito.verify(repository).findById("Test id");
     }
 
 

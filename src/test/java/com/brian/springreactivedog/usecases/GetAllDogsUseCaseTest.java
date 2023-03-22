@@ -11,26 +11,26 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
-class SaveDogUseCaseTest {
+class GetAllDogsUseCaseTest {
 
     @Mock
     IDogRepository repository;
     ModelMapper modelMapper;
-    SaveDogUseCase saveDogUseCase;
+    GetAllDogsUseCase getAllDogsUseCase;
 
     @BeforeEach
     void init() {
         modelMapper = new ModelMapper();
-        saveDogUseCase = new SaveDogUseCase(repository, modelMapper);
+        getAllDogsUseCase = new GetAllDogsUseCase(repository, modelMapper);
     }
 
     @Test
-    @DisplayName("save_Success")
-    void saveDog() {
+    @DisplayName("getAll_Success")
+    void getAllDogs() {
 
         Dog dog = new Dog();
         dog.setName("Test name");
@@ -38,20 +38,25 @@ class SaveDogUseCaseTest {
         dog.setAge(3);
         dog.setColor("Test color");
 
-        Mockito.when(repository.save(dog)).
+        Dog dog2 = new Dog();
+        dog.setName("Test name 2");
+        dog.setBreed("Test breed 2");
+        dog.setAge(5);
+        dog.setColor("Test color 2");
+
+        Mockito.when(repository.findAll()).
                 thenAnswer(InvocationOnMock -> {
-                    return Mono.just(dog);
+                    return Flux.just(dog, dog2);
                 });
 
-        Mono<DogDTO> response = saveDogUseCase.save(modelMapper.map(dog, DogDTO.class));
+        Flux<DogDTO> response = getAllDogsUseCase.get();
 
         StepVerifier.create(response)
-                .expectNext(modelMapper.map(dog,DogDTO.class))
-                .expectNextCount(0)
+                .expectNext(modelMapper.map(dog, DogDTO.class))
+                .expectNextCount(1)
                 .verifyComplete();
 
-        Mockito.verify(repository).save(dog);
+        Mockito.verify(repository).findAll();
     }
-
 
 }

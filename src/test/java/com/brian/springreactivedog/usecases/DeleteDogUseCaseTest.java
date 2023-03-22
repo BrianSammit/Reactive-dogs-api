@@ -1,36 +1,33 @@
 package com.brian.springreactivedog.usecases;
 
-import com.brian.springreactivedog.domain.DTO.DogDTO;
 import com.brian.springreactivedog.domain.collection.Dog;
 import com.brian.springreactivedog.repository.IDogRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
-class SaveDogUseCaseTest {
+class DeleteDogUseCaseTest {
 
     @Mock
     IDogRepository repository;
-    ModelMapper modelMapper;
-    SaveDogUseCase saveDogUseCase;
+    DeleteDogUseCase deleteDogUseCase;
 
     @BeforeEach
     void init() {
-        modelMapper = new ModelMapper();
-        saveDogUseCase = new SaveDogUseCase(repository, modelMapper);
+        deleteDogUseCase = new DeleteDogUseCase(repository);
     }
 
     @Test
-    @DisplayName("save_Success")
-    void saveDog() {
+    @DisplayName("delete_Success")
+    void deleteDog() {
 
         Dog dog = new Dog();
         dog.setName("Test name");
@@ -38,20 +35,23 @@ class SaveDogUseCaseTest {
         dog.setAge(3);
         dog.setColor("Test color");
 
-        Mockito.when(repository.save(dog)).
+        Mockito.when(repository.findById(ArgumentMatchers.anyString())).
                 thenAnswer(InvocationOnMock -> {
                     return Mono.just(dog);
                 });
+        Mockito.when(repository.delete(dog)).
+                thenAnswer(InvocationOnMock -> {
+                    return Mono.just(Void.TYPE);
+                });
 
-        Mono<DogDTO> response = saveDogUseCase.save(modelMapper.map(dog, DogDTO.class));
+        Mono<String> response = deleteDogUseCase.delete("Test project");
 
         StepVerifier.create(response)
-                .expectNext(modelMapper.map(dog,DogDTO.class))
-                .expectNextCount(0)
+                .expectNextCount(1)
                 .verifyComplete();
 
-        Mockito.verify(repository).save(dog);
+        Mockito.verify(repository).delete(dog);
+        Mockito.verify(repository).findById("Test project");
     }
-
 
 }
