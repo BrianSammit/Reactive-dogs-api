@@ -2,6 +2,7 @@ package com.brian.springreactivedog.router;
 
 import com.brian.springreactivedog.domain.DTO.DogDTO;
 import com.brian.springreactivedog.usecases.GetAllDogsUseCase;
+import com.brian.springreactivedog.usecases.GetDogsByIdUseCase;
 import com.brian.springreactivedog.usecases.SaveDogUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,5 +37,15 @@ public class DogRouter {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(BodyInserters.fromPublisher(getAllDogsUseCase.get(), DogDTO.class))
                         .onErrorResume(throwable -> ServerResponse.noContent().build()));
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> getDogsById(GetDogsByIdUseCase getDogsByIdUseCase) {
+        return route(GET("/dogs/{id}"),
+                request -> getDogsByIdUseCase.apply(request.pathVariable("id"))
+                        .flatMap(dogDTO -> ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(dogDTO))
+                        .onErrorResume(throwable -> ServerResponse.notFound().build()));
     }
 }
