@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
 public class AddDogUseCase {
 
     private final IDogRepository repository;
-
     private final ModelMapper mapper;
     private final DogPublisher dogPublisher;
 
