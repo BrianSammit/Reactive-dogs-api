@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class DogEvent {
-    private String dogId;
+    private String dogWlkId;
     private DogDTO dogToAdd;
     private String eventType;
 }

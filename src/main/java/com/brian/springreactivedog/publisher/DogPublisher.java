@@ -17,12 +17,15 @@ public class DogPublisher {
         this.objectMapper = objectMapper;
     }
 
-    public void publish(String dogId, DogDTO dogDTO) throws JsonProcessingException {
-        String message = objectMapper.writeValueAsString(new DogEvent(dogId, dogDTO, "Dog added"));
+    public void publish(String dogWlkId, DogDTO dogDTO) throws JsonProcessingException {
+        String message = objectMapper.writeValueAsString(new DogEvent(dogWlkId, dogDTO, "DogAdded"));
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.DOG_EXCHANGE,
                 RabbitMQConfig.DOG_ROUTING_KEY,
                 message
         );
+    }
+
+    public void publishError(Throwable errorEvent){
     }
 }

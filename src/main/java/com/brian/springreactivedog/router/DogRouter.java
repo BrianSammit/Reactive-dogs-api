@@ -84,12 +84,13 @@ public class DogRouter {
     @Bean
     public RouterFunction<ServerResponse> addDogToWalker(AddDogUseCase addDogUseCase) {
         return route(
-                POST("/dogs/{dogId}/add_to_walker/{wlkId}"),
+                PUT("/dogs/{dogId}/add_to_walker/{wlkId}"),
                 request -> walkerAPI.get()
-                        .uri("/dogWalker/" + request.pathVariable("wlkId"))
+                        .uri("/dogWalker/{dogId}", request.pathVariable("wlkId"))
                         .retrieve()
                         .bodyToMono(DogWalkerDTO.class)
-                        .flatMap(dogWalkerDTO -> addDogUseCase.subscribeClass(dogWalkerDTO.getId(), request.pathVariable("dogId"))
+                        .flatMap(dogWalkerDTO -> addDogUseCase
+                                .subscribeClass(request.pathVariable("dogId"),  request.pathVariable("wlkId"))
                                 .flatMap(dogDTO -> ServerResponse.ok()
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .bodyValue(dogDTO))
