@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.function.Supplier;
 
@@ -20,7 +21,8 @@ public class GetAllDogsUseCase implements Supplier<Flux<DogDTO>> {
     public Flux<DogDTO> get() {
         return this.dogRepository
                 .findAll()
-                .switchIfEmpty(Flux.empty())
-                .map(dog -> mapper.map(dog, DogDTO.class));
+                .switchIfEmpty(Mono.error(new Throwable("No Dogs available")))
+                .map(dog -> mapper.map(dog, DogDTO.class))
+                .onErrorResume(Mono::error);
     }
 }

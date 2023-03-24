@@ -18,9 +18,10 @@ public class SaveDogUseCase implements SaveDog {
     private final ModelMapper mapper;
     @Override
     public Mono<DogDTO> save(DogDTO dogDTO) {
-        return this.dogRepository.save(
-                mapper.map(dogDTO, Dog.class))
+        return this.dogRepository
+                .save(mapper.map(dogDTO, Dog.class))
                 .switchIfEmpty(Mono.empty())
-                .map(dog -> mapper.map(dog, DogDTO.class));
+                .map(dog -> mapper.map(dog, DogDTO.class))
+                .onErrorResume(Mono::error);
     }
 }

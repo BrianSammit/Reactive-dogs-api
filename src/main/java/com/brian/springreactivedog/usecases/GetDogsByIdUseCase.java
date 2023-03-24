@@ -20,7 +20,8 @@ public class GetDogsByIdUseCase implements Function<String, Mono<DogDTO>> {
     public Mono<DogDTO> apply(String id) {
         return this.dogRepository
                 .findById(id)
-                .switchIfEmpty(Mono.error(new Throwable(HttpStatus.NOT_FOUND.toString())))
-                .map(dog-> mapper.map(dog, DogDTO.class));
+                .switchIfEmpty(Mono.error(new Throwable("Dog not found")))
+                .map(dog-> mapper.map(dog, DogDTO.class))
+                .onErrorResume(Mono::error);
     }
 }

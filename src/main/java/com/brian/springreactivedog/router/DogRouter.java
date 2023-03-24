@@ -23,8 +23,8 @@ public class DogRouter {
                                 .flatMap(result -> ServerResponse.status(201)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .bodyValue(result))
-
-                                .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NOT_ACCEPTABLE).build())));
+                                .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NOT_ACCEPTABLE)
+                                        .bodyValue(throwable.getMessage()))));
     }
 
 
@@ -34,7 +34,8 @@ public class DogRouter {
                 request -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(BodyInserters.fromPublisher(getAllDogsUseCase.get(), DogDTO.class))
-                        .onErrorResume(throwable -> ServerResponse.noContent().build()));
+                        .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NO_CONTENT)
+                                .bodyValue(throwable.getMessage())));
     }
 
     @Bean
@@ -44,18 +45,19 @@ public class DogRouter {
                         .flatMap(dogDTO -> ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue(dogDTO))
-                        .onErrorResume(throwable -> ServerResponse.notFound().build()));
+                        .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NO_CONTENT)
+                                .bodyValue(throwable.getMessage())));
     }
 
     @Bean
-    public RouterFunction<ServerResponse> deleteStudents(DeleteDogUseCase deleteDogUseCase){
+    public RouterFunction<ServerResponse> deleteDog(DeleteDogUseCase deleteDogUseCase){
         return  route(DELETE("/dogs/{id}"),
                 request -> deleteDogUseCase.delete(request.pathVariable("id"))
                         .flatMap(dogDTO -> ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue("Dog Deleted"))
-                        .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NOT_FOUND).build())
-        );
+                        .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NO_CONTENT)
+                                .bodyValue(throwable.getMessage())));
     }
 
     @Bean
@@ -66,7 +68,8 @@ public class DogRouter {
                                 .flatMap(result -> ServerResponse.status(200)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .bodyValue(result))
-                                .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NOT_FOUND).build())
+                                .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NOT_FOUND)
+                                        .bodyValue(throwable.getMessage()))
                         )
         );
     }

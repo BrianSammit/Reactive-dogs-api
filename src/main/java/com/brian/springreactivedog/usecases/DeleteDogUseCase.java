@@ -15,7 +15,9 @@ public class DeleteDogUseCase implements DeleteDog {
     public Mono<Void> delete(String id) {
         return dogRepository
                 .findById(id)
-                .switchIfEmpty(Mono.error(new Throwable("dog not found")))
-                .flatMap(dogRepository::delete);
+                .switchIfEmpty(Mono.error(new Throwable("Dog not found")))
+                .flatMap(dogRepository::delete)
+                .onErrorResume(Mono::error);
+
     }
 }

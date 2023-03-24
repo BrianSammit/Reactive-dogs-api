@@ -1,5 +1,6 @@
 package com.brian.springreactivedog.domain.collection;
 
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -14,9 +15,17 @@ public class Dog {
     @Id
     private String id;
 
+    @NotBlank(message="Empty field error")
+    @NotNull(message ="name is required")
     private String name;
+    @NotBlank(message="Empty field error")
+    @NotNull(message ="bree is required")
     private String breed;
+    @Positive
+    @Max(value = 40, message = "Age should not be greater than 40")
     private Integer age;
+    @NotBlank(message="Empty field error")
+    @NotNull(message ="color is required")
     private String color;
 
 
