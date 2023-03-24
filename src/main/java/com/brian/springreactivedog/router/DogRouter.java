@@ -99,4 +99,23 @@ public class DogRouter {
                                         .bodyValue(throwable.getMessage())))
         );
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> removeToWalker(RemoveDogUseCase removeDogUseCase) {
+        return route(
+                PUT("/dogs/{dogId}/remove_to_walker/{wlkId}"),
+                request -> walkerAPI.get()
+                        .uri("/dogWalker/{dogId}", request.pathVariable("wlkId"))
+                        .retrieve()
+                        .bodyToMono(DogWalkerDTO.class)
+                        .flatMap(dogWalkerDTO -> removeDogUseCase
+                                .subscribeClass(request.pathVariable("dogId"),  request.pathVariable("wlkId"))
+                                .flatMap(dogDTO -> ServerResponse.ok()
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .bodyValue(dogDTO))
+                        .onErrorResume(throwable -> ServerResponse.badRequest()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(throwable.getMessage())))
+        );
+    }
 }

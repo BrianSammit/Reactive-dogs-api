@@ -26,6 +26,15 @@ public class DogPublisher {
         );
     }
 
+    public void publishRemove(String dogWlkId, DogDTO dogDTO) throws JsonProcessingException {
+        String message = objectMapper.writeValueAsString(new DogEvent(dogWlkId, dogDTO, "DogRemove"));
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.DOG_EXCHANGE,
+                RabbitMQConfig.DOG_ROUTING_KEY,
+                message
+        );
+    }
+
     public void publishError(Throwable errorEvent){
     }
 }
