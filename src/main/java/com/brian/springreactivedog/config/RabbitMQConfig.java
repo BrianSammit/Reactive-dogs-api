@@ -19,12 +19,12 @@ public class RabbitMQConfig {
     public static final String GENERAL_QUEUE = "general.queue";
     public static final String GENERAL_ROUTING_KEY = "events.#";
 
-//    @Bean
-//    public RabbitAdmin rabbitAdmin(RabbitTemplate rabbitTemplate) {
-//        var admin =  new RabbitAdmin(rabbitTemplate);
-//        admin.declareExchange(new TopicExchange(DOG_EXCHANGE));
-//        return admin;
-//    }
+    @Bean
+    public RabbitAdmin rabbitAdmin(RabbitTemplate rabbitTemplate) {
+        var admin =  new RabbitAdmin(rabbitTemplate);
+        admin.declareExchange(new TopicExchange(DOG_EXCHANGE));
+        return admin;
+    }
     @Bean
     public Queue queue(){
         return new Queue(DOG_QUEUE);
@@ -52,16 +52,16 @@ public class RabbitMQConfig {
                 .to(exchange())
                 .with(GENERAL_ROUTING_KEY);
     }
-//
-//    @Bean
-//    public MessageConverter converter(){
-//        return new Jackson2JsonMessageConverter();
-//    }
-//
-//    @Bean
-//    public AmqpTemplate template(ConnectionFactory connectionFactory) {
-//        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-//        rabbitTemplate.setMessageConverter(converter());
-//        return rabbitTemplate;
-//    }
+
+    @Bean
+    public MessageConverter converter(){
+        return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public AmqpTemplate template(ConnectionFactory connectionFactory) {
+        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(converter());
+        return rabbitTemplate;
+    }
 }
