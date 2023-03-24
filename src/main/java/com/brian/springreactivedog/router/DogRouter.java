@@ -1,12 +1,14 @@
 package com.brian.springreactivedog.router;
 
 import com.brian.springreactivedog.domain.DTO.DogDTO;
+import com.brian.springreactivedog.domain.DTO.DogWalkerDTO;
 import com.brian.springreactivedog.usecases.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
@@ -15,6 +17,11 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 @Configuration
 public class DogRouter {
+    private WebClient walkerAPI;
+
+    public DogRouter() {
+        walkerAPI = WebClient.create("http://localhost:8081");
+    }
     @Bean
     public RouterFunction<ServerResponse> saveDog(SaveDogUseCase saveDogUseCase){
         return route(POST("/dogs").and(accept(MediaType.APPLICATION_JSON)),
@@ -71,6 +78,24 @@ public class DogRouter {
                                 .onErrorResume(throwable -> ServerResponse.status(HttpStatus.NOT_FOUND)
                                         .bodyValue(throwable.getMessage()))
                         )
+        );
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> addDogToWalker(AddDogUseCase addDogUseCase) {
+        return route(
+                POST("/dogs/{dogId}/add_to_walker/{wlkId}"),
+                request -> walkerAPI.get()
+                        .uri("/dogWalker/" + request.pathVariable("wlkId"))
+                        .retrieve()
+                        .bodyToMono(DogWalkerDTO.class)
+                        .flatMap(dogWalkerDTO -> addDogUseCase.subscribeClass(dogWalkerDTO.getId(), request.pathVariable("dogId"))
+                                .flatMap(dogDTO -> ServerResponse.ok()
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .bodyValue(dogDTO))
+                                .onErrorResume(throwable -> ServerResponse.badRequest()
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .bodyValue(throwable.getMessage())))
         );
     }
 }
