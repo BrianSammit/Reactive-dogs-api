@@ -28,6 +28,8 @@ public class DogDTO {
     @NotNull(message ="color is required")
     private String color;
 
+    private Boolean isAdded;
+
     public DogDTO(String name, String breed, Integer age, String color) {
         this.id = UUID.randomUUID().toString().substring(0, 10);
         this.name = name;
